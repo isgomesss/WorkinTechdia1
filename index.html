@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Jogo da Velha</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen">
+  <h1 class="text-4xl font-bold mb-6 text-gray-800">Jogo da Velha</h1>
+
+  <div class="flex justify-around w-full max-w-md mb-6">
+    <div class="text-blue-600 text-lg font-semibold">X: <span id="scoreX">0</span></div>
+    <div class="text-red-600 text-lg font-semibold">O: <span id="scoreO">0</span></div>
+  </div>
+
+  <div id="board" class="grid grid-cols-3 gap-2 w-72 h-72">
+    <!-- Células serão geradas por JS -->
+  </div>
+
+  <button onclick="resetGame()" class="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+    Reiniciar Jogo
+  </button>
+
+  <script>
+    const board = document.getElementById('board');
+    const scoreXEl = document.getElementById('scoreX');
+    const scoreOEl = document.getElementById('scoreO');
+    let currentPlayer = 'X';
+    let score = { X: 0, O: 0 };
+    let cells = [];
+
+    function createBoard() {
+      board.innerHTML = '';
+      cells = [];
+
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.className = "flex items-center justify-center text-4xl font-bold bg-white border border-gray-300 cursor-pointer transition hover:bg-gray-100";
+        cell.dataset.index = i;
+        cell.addEventListener('click', handleMove);
+        board.appendChild(cell);
+        cells.push(cell);
+      }
+    }
+
+    function handleMove(e) {
+      const cell = e.target;
+
+      if (cell.textContent !== '') return;
+
+      cell.textContent = currentPlayer;
+      cell.classList.add(currentPlayer === 'X' ? 'text-blue-600' : 'text-red-600');
+
+      if (checkWinner()) {
+        score[currentPlayer]++;
+        updateScore();
+        setTimeout(() => {
+          alert(`${currentPlayer} venceu!`);
+          resetGame();
+        }, 100);
+        return;
+      }
+
+      if (cells.every(c => c.textContent !== '')) {
+        setTimeout(() => {
+          alert('Empate!');
+          resetGame();
+        }, 100);
+        return;
+      }
+
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+    }
+
+    function checkWinner() {
+      const wins = [
+        [0,1,2], [3,4,5], [6,7,8],
+        [0,3,6], [1,4,7], [2,5,8],
+        [0,4,8], [2,4,6]
+      ];
+
+      return wins.some(pattern => {
+        const [a, b, c] = pattern;
+        return cells[a].textContent &&
+               cells[a].textContent === cells[b].textContent &&
+               cells[a].textContent === cells[c].textContent;
+      });
+    }
+
+    function updateScore() {
+      scoreXEl.textContent = score.X;
+      scoreOEl.textContent = score.O;
+    }
+
+    function resetGame() {
+      currentPlayer = 'X';
+      createBoard();
+    }
+
+    // Inicializa
+    createBoard();
+  </script>
+</body>
+</html>
